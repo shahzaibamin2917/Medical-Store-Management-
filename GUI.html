@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MediCore — Pharmacy Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#F4F6FA;--surface:#FFFFFF;--surface2:#F0F3F9;--border:#E2E8F3;--border2:#CBD5E8;
+    --text:#111827;--text2:#4B5563;--text3:#9CA3AF;
+    --accent:#1A56DB;--accent-light:#EEF3FD;--accent-hover:#1448C0;
+    --green:#059669;--green-light:#ECFDF5;--green-dark:#065F46;
+    --red:#DC2626;--red-light:#FEF2F2;--amber:#D97706;--amber-light:#FFFBEB;
+    --teal:#0D9488;--teal-light:#F0FDFA;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+    --radius:10px;--radius-lg:14px;
+  }
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+  h1,h2,h3{font-family:'DM Sans',sans-serif;font-weight:600;line-height:1.3}
+
+  /* ── LAYOUT ── */
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;position:fixed;top:0;left:0;height:100vh;z-index:100}
+  .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+  .content{padding:28px;flex:1}
+
+  /* ── SIDEBAR ── */
+  .sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .logo-mark{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center}
+  .logo-mark svg{width:18px;height:18px;fill:white}
+  .logo-name{font-size:15px;font-weight:600;letter-spacing:-.3px}
+  .logo-sub{font-size:11px;color:var(--text3);margin-top:1px}
+  .sidebar-nav{padding:12px 8px;flex:1;overflow-y:auto}
+  .nav-section-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:10px 12px 4px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:13.5px;font-weight:400;transition:all .15s;position:relative;user-select:none}
+  .nav-item:hover{background:var(--surface2);color:var(--text)}
+  .nav-item.active{background:var(--accent-light);color:var(--accent);font-weight:500}
+  .nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.75}
+  .nav-item.active svg{opacity:1}
+  .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
+  .admin-tag{display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--surface2);border-radius:8px}
+  .admin-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+  .admin-info .name{font-size:12.5px;font-weight:500}
+  .admin-info .role{font-size:11px;color:var(--text3)}
+
+  /* ── TOPBAR ── */
+  .page-title{font-size:15px;font-weight:600;color:var(--text)}
+  .topbar-right{display:flex;align-items:center;gap:12px}
+  .topbar-badge{background:var(--green-light);color:var(--green);font-size:11.5px;font-weight:500;padding:4px 10px;border-radius:20px}
+  .btn-icon{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+  .btn-icon:hover{background:var(--surface2)}
+  .btn-icon svg{width:16px;height:16px;stroke:var(--text2);fill:none;stroke-width:1.7}
+
+  /* ── BUTTONS ── */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:0 16px;height:36px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif}
+  .btn-primary{background:var(--accent);color:white;border-color:var(--accent)}
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-secondary{background:white;color:var(--text);border-color:var(--border2)}
+  .btn-secondary:hover{background:var(--surface2)}
+  .btn-danger{background:var(--red-light);color:var(--red);border-color:#FCA5A5}
+  .btn-danger:hover{background:#FEE2E2}
+  .btn-success{background:var(--green-light);color:var(--green-dark);border-color:#6EE7B7}
+  .btn-success:hover{background:#D1FAE5}
+  .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* ── VIEWS ── */
+  .view{display:none}
+  .view.active{display:block}
+
+  /* ── STATS CARDS ── */
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow)}
+  .stat-card .label{font-size:12px;color:var(--text3);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .stat-card .value{font-size:26px;font-weight:600;letter-spacing:-1px;line-height:1}
+  .stat-card .sub{font-size:12px;color:var(--text3);margin-top:6px}
+  .stat-card .icon-wrap{float:right;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .stat-card .icon-wrap svg{width:18px;height:18px;stroke-width:1.8;fill:none}
+  .ic-blue{background:var(--accent-light)}.ic-blue svg{stroke:var(--accent)}
+  .ic-green{background:var(--green-light)}.ic-green svg{stroke:var(--green)}
+  .ic-amber{background:var(--amber-light)}.ic-amber svg{stroke:var(--amber)}
+  .ic-red{background:var(--red-light)}.ic-red svg{stroke:var(--red)}
+
+  /* ── CARDS ── */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+  .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:14px;font-weight:600}
+  .card-body{padding:20px}
+
+  /* ── SEARCH BAR ── */
+  .search-row{display:flex;gap:10px;align-items:center;margin-bottom:16px}
+  .search-wrap{position:relative;flex:1}
+  .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:1.8}
+  .search-wrap input{width:100%;padding:0 12px 0 34px;height:36px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface);font-family:'DM Sans',sans-serif;color:var(--text);outline:none}
+  .search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+
+  /* ── TABLE ── */
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:11.5px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:10px 16px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2)}
+  tbody td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13.5px;color:var(--text2)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--surface2)}
+  tbody tr:hover td{color:var(--text)}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500}
+  .badge-green{background:var(--green-light);color:var(--green-dark)}
+  .badge-red{background:var(--red-light);color:var(--red)}
+  .badge-amber{background:var(--amber-light);color:var(--amber)}
+  .badge-blue{background:var(--accent-light);color:var(--accent)}
+  .badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--surface);border-radius:16px;box-shadow:var(--shadow-md);width:460px;max-width:95vw;max-height:90vh;overflow-y:auto}
+  .modal-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-size:15px;font-weight:600}
+  .modal-close{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;display:flex}
+  .modal-close:hover{color:var(--text);background:var(--surface2)}
+  .modal-body{padding:22px}
+  .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+  /* ── FORM ── */
+  .form-group{margin-bottom:16px}
+  .form-label{display:block;font-size:12.5px;font-weight:500;color:var(--text2);margin-bottom:6px}
+  .form-label .req{color:var(--red)}
+  .form-input{width:100%;height:38px;padding:0 12px;border:1px solid var(--border2);border-radius:8px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border .15s,box-shadow .15s}
+  .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,86,219,.1)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-error{font-size:11.5px;color:var(--red);margin-top:4px}
+  .form-hint{font-size:11.5px;color:var(--text3);margin-top:4px}
+
+  /* ── LOGIN ── */
+  #loginView{background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:400px;box-shadow:var(--shadow-md)}
+  .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
+  .login-logo .mark{width:40px;height:40px;background:var(--accent);border-radius:11px;display:flex;align-items:center;justify-content:center}
+  .login-logo .mark svg{width:22px;height:22px;fill:white}
+  .login-logo .text .n{font-size:18px;font-weight:700}
+  .login-logo .text .s{font-size:11.5px;color:var(--text3)}
+  .login-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:6px}
+  .login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:28px}
+  .login-btn{width:100%;height:42px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s;margin-top:4px}
+  .login-btn:hover{background:var(--accent-hover)}
+  .error-msg{background:var(--red-light);color:var(--red);border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+  .demo-hint{background:var(--accent-light);color:var(--accent);border-radius:8px;padding:10px 14px;font-size:12.5px;margin-top:16px;text-align:center}
+
+  /* ── INVOICE ── */
+  .invoice-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;max-width:420px;box-shadow:var(--shadow-md)}
+  .invoice-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
+  .invoice-logo{font-size:17px;font-weight:700;color:var(--accent)}
+  .invoice-logo span{font-family:'Instrument Serif',serif;font-style:italic}
+  .invoice-meta{text-align:right;font-size:12px;color:var(--text3)}
+  .invoice-divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+  .invoice-row{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;color:var(--text2)}
+  .invoice-total-row{display:flex;justify-content:space-between;font-size:15px;font-weight:600;padding:8px 0;border-top:2px solid var(--border);margin-top:8px;color:var(--text)}
+  .invoice-stamp{text-align:center;margin-top:20px}
+  .invoice-stamp .stamp{display:inline-block;border:2px solid var(--green);color:var(--green);font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;letter-spacing:1px;transform:rotate(-3deg)}
+
+  /* ── DASHBOARD CHART PLACEHOLDER ── */
+  .chart-bar-row{display:flex;align-items:flex-end;gap:10px;height:100px;padding-top:10px}
+  .cbar{background:var(--accent-light);border-radius:5px 5px 0 0;flex:1;transition:height .4s;cursor:pointer;position:relative}
+  .cbar:hover{background:var(--accent);opacity:.85}
+  .cbar-label{text-align:center;font-size:11px;color:var(--text3);margin-top:6px}
+
+  /* ── TOAST ── */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:white;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;display:flex;align-items:center;gap:8px}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.success{background:#059669}
+  .toast.error{background:var(--red)}
+
+  /* ── EMPTY STATE ── */
+  .empty{text-align:center;padding:48px 20px;color:var(--text3)}
+  .empty svg{width:44px;height:44px;stroke:var(--border2);fill:none;stroke-width:1.2;margin-bottom:12px}
+  .empty .et{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:4px}
+  .empty .es{font-size:13px}
+
+  /* ── CUSTOMER MODE ── */
+  .search-result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+  .med-info .name{font-size:15px;font-weight:600;margin-bottom:4px}
+  .med-info .details{font-size:12.5px;color:var(--text3)}
+  .med-price{font-size:20px;font-weight:700;color:var(--accent);text-align:right}
+  .med-price .per{font-size:11.5px;color:var(--text3);font-weight:400}
+
+  /* ── TABS ── */
+  .tabs{display:flex;gap:2px;background:var(--surface2);border-radius:9px;padding:3px;margin-bottom:20px;width:fit-content}
+  .tab{padding:7px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text3);transition:all .15s;white-space:nowrap}
+  .tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+
+  /* responsive */
+  @media(max-width:900px){
+    .sidebar{width:200px}.main{margin-left:200px}
+    .stats-grid{grid-template-columns:1fr 1fr}
+  }
+  @media(max-width:640px){
+    .sidebar{transform:translateX(-100%)}.main{margin-left:0}
+    .stats-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="mark"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M12 8v8M8 12h8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div class="text"><div class="n">MediCore</div><div class="s">Pharmacy Management</div></div>
+    </div>
+    <div class="login-title">Welcome Back</div>
+    <div class="login-sub">Sign in to your pharmacy dashboard</div>
+    <div id="loginError" class="error-msg">Invalid username or password. Please try again.</div>
+    <div class="form-group"><label class="form-label">Username <span class="req">*</span></label><input class="form-input" id="loginUser" type="text" placeholder="admin" autocomplete="off"/></div>
+    <div class="form-group"><label class="form-label">Password <span class="req">*</span></label><input class="form-input" id="loginPass" type="password" placeholder="Enter password"/></div>
+    <button class="login-btn" onclick="doLogin()">Sign In to Dashboard</button>
+    <div class="demo-hint">Demo: username <strong>admin</strong> · password <strong>123</strong></div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="appView" style="display:none">
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/><path d="M12 8v8M8 12h8" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+      <div><div class="logo-name">MediCore</div><div class="logo-sub">Pharmacy System</div></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="showView('dashboard',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-section-label">Inventory</div>
+      <div class="nav-item" onclick="showView('inventory',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        Medicine Stock
+      </div>
+      <div class="nav-item" onclick="showView('add',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Add Medicine
+      </div>
+      <div class="nav-section-label">Sales</div>
+      <div class="nav-item" onclick="showView('customer',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Customer Sale
+      </div>
+      <div class="nav-item" onclick="showView('invoices',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="12" y2="17"/></svg>
+        Invoices
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-tag">
+        <div class="admin-avatar">AD</div>
+        <div class="admin-info"><div class="name">Admin</div><div class="role">Administrator</div></div>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn btn-secondary" style="width:100%;font-size:12.5px" onclick="doLogout()">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div id="topbarTitle" class="page-title">Dashboard Overview</div>
+      <div class="topbar-right">
+        <span id="stockBadge" class="topbar-badge">0 medicines in stock</span>
+        <div id="topbarDate" style="font-size:12.5px;color:var(--text3)"></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ─── DASHBOARD ─── -->
+      <div id="view-dashboard" class="view active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="icon-wrap ic-blue"><svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+            <div class="label">Total Medicines</div>
+            <div class="value" id="statTotal">0</div>
+            <div class="sub">Items in catalog</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon-wrap ic-green"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="label">In Stock</div>
+            <div class="value" id="statInStock">0</div>
+            <div class="sub">Active medicines</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon-wrap ic-red"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="label">Low Stock</div>
+            <div class="value" id="statLow">0</div>
+            <div class="sub">Qty &lt; 10</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon-wrap ic-amber"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="label">Total Sales</div>
+            <div class="value" id="statRevenue">Rs. 0</div>
+            <div class="sub">All time revenue</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Stock</div>
+              <button class="btn btn-secondary" style="font-size:12px;height:30px;padding:0 12px" onclick="showView('inventory',document.querySelector('.nav-item:nth-child(2)'))">View All</button>
+            </div>
+            <div class="card-body" style="padding:0">
+              <div class="table-wrap">
+                <table id="dashTable">
+                  <thead><tr><th>Name</th><th>Price</th><th>Qty</th><th>Status</th></tr></thead>
+                  <tbody id="dashTableBody"><tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text3)">No medicines added yet</td></tr></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Recent Invoices</div></div>
+            <div class="card-body" style="padding:0" id="dashInvoiceList">
+              <div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><div class="et">No invoices yet</div><div class="es">Sales will appear here</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── INVENTORY ─── -->
+      <div id="view-inventory" class="view">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Medicine Inventory</div>
+            <button class="btn btn-primary" onclick="showView('add',document.querySelector('[onclick*=\'add\']'))">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Medicine
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="search-row">
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="invSearch" placeholder="Search by name or ID…" oninput="renderInventory()"/>
+              </div>
+              <select id="invFilter" onchange="renderInventory()" style="height:36px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px;background:white;font-family:'DM Sans',sans-serif;color:var(--text)">
+                <option value="all">All Status</option>
+                <option value="instock">In Stock</option>
+                <option value="low">Low Stock</option>
+                <option value="out">Out of Stock</option>
+              </select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Medicine Name</th><th>Price (Rs.)</th><th>Quantity</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody id="invTableBody"></tbody>
+              </table>
+            </div>
+            <div id="invEmpty" class="empty" style="display:none">
+              <svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              <div class="et">No medicines found</div>
+              <div class="es">Try adjusting your search or add a new medicine</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── ADD MEDICINE ─── -->
+      <div id="view-add" class="view">
+        <div style="max-width:560px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Add New Medicine</div></div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Medicine ID <span class="req">*</span></label>
+                  <input class="form-input" id="fId" type="number" placeholder="e.g. 101"/>
+                  <div class="form-error" id="fIdErr"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Medicine Name <span class="req">*</span></label>
+                  <input class="form-input" id="fName" type="text" placeholder="e.g. Panadol"/>
+                  <div class="form-error" id="fNameErr"></div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Price (Rs.) <span class="req">*</span></label>
+                  <input class="form-input" id="fPrice" type="number" placeholder="e.g. 50"/>
+                  <div class="form-error" id="fPriceErr"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Quantity <span class="req">*</span></label>
+                  <input class="form-input" id="fQty" type="number" placeholder="e.g. 100"/>
+                  <div class="form-error" id="fQtyErr"></div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn btn-primary" onclick="addMedicine()">
+                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  Save Medicine
+                </button>
+                <button class="btn btn-secondary" onclick="clearAddForm()">Clear</button>
+              </div>
+            </div>
+          </div>
+          <div id="addSuccessCard" style="display:none;margin-top:16px" class="card">
+            <div class="card-body">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:36px;height:36px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <div><div style="font-weight:600;font-size:14px" id="addSuccessName"></div><div style="font-size:12.5px;color:var(--text3)">Medicine added successfully</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── CUSTOMER SALE ─── -->
+      <div id="view-customer" class="view">
+        <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px">
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-header"><div class="card-title">Find Medicine</div></div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label class="form-label">Customer Name <span class="req">*</span></label>
+                  <input class="form-input" id="cName" type="text" placeholder="Enter customer name"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Search Medicine</label>
+                  <div class="search-wrap">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="cSearch" placeholder="Search by name or ID…" oninput="searchMedicine()"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="cResults"></div>
+          </div>
+          <div id="invoiceSection" style="display:none">
+            <div class="invoice-box" id="invoiceBox"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── INVOICES ─── -->
+      <div id="view-invoices" class="view">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Sales History</div>
+            <span id="invoiceCount" class="badge badge-blue">0 invoices</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Customer</th><th>Medicine</th><th>Qty</th><th>Total (Rs.)</th><th>Date</th></tr></thead>
+                <tbody id="invoicesTableBody"></tbody>
+              </table>
+            </div>
+            <div id="invoicesEmpty" class="empty">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+              <div class="et">No sales yet</div>
+              <div class="es">Completed transactions will appear here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+</div><!-- /appView -->
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Medicine</div>
+      <button class="modal-close" onclick="closeModal('editModal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editIndex"/>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Medicine ID</label><input class="form-input" id="eId" readonly style="background:var(--surface2)"/></div>
+        <div class="form-group"><label class="form-label">Medicine Name <span class="req">*</span></label><input class="form-input" id="eName"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Price (Rs.) <span class="req">*</span></label><input class="form-input" id="ePrice" type="number"/></div>
+        <div class="form-group"><label class="form-label">Quantity <span class="req">*</span></label><input class="form-input" id="eQty" type="number"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Buy Modal -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="buyModalTitle">Purchase Medicine</div>
+      <button class="modal-close" onclick="closeModal('buyModal')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="buyMedIndex"/>
+      <div class="form-group">
+        <label class="form-label">Available Stock</label>
+        <div id="buyStock" style="font-size:15px;font-weight:600;color:var(--accent)"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantity to Purchase <span class="req">*</span></label>
+        <input class="form-input" id="buyQty" type="number" min="1" placeholder="Enter quantity"/>
+        <div class="form-hint" id="buyHint"></div>
+        <div class="form-error" id="buyErr"></div>
+      </div>
+      <div id="buyPreview" style="background:var(--accent-light);border-radius:10px;padding:14px;margin-top:4px;display:none">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Estimated Total</div>
+        <div style="font-size:22px;font-weight:700;color:var(--accent)" id="buyPreviewTotal">Rs. 0</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('buyModal')">Cancel</button>
+      <button class="btn btn-success" onclick="confirmBuy()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm Purchase
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+let medicines = JSON.parse(localStorage.getItem('msm_medicines') || '[]');
+let invoices  = JSON.parse(localStorage.getItem('msm_invoices')  || '[]');
+let totalRev  = parseInt(localStorage.getItem('msm_revenue')     || '0');
+
+function save(){
+  localStorage.setItem('msm_medicines', JSON.stringify(medicines));
+  localStorage.setItem('msm_invoices',  JSON.stringify(invoices));
+  localStorage.setItem('msm_revenue',   totalRev.toString());
+}
+
+// ═══════════════════ LOGIN ═══════════════════
+function doLogin(){
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if(u==='admin' && p==='123'){
+    document.getElementById('loginView').style.display='none';
+    document.getElementById('appView').style.display='block';
+    updateDashboard();
+    updateDate();
+  } else {
+    document.getElementById('loginError').style.display='block';
+  }
+}
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+document.getElementById('loginUser').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+function doLogout(){
+  document.getElementById('appView').style.display='none';
+  document.getElementById('loginView').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginError').style.display='none';
+}
+
+// ═══════════════════ NAVIGATION ═══════════════════
+const viewTitles={dashboard:'Dashboard Overview',inventory:'Medicine Inventory',add:'Add New Medicine',customer:'Customer Sale',invoices:'Sales History'};
+function showView(name, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = viewTitles[name]||name;
+  if(name==='dashboard') updateDashboard();
+  if(name==='inventory') renderInventory();
+  if(name==='invoices') renderInvoices();
+  if(name==='customer'){document.getElementById('cResults').innerHTML='';document.getElementById('invoiceSection').style.display='none';}
+}
+
+function updateDate(){
+  const d = new Date();
+  document.getElementById('topbarDate').textContent = d.toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'});
+}
+
+// ═══════════════════ STATS ═══════════════════
+function updateDashboard(){
+  const active = medicines.filter(m=>m.name!=='REMOVED');
+  const inStock = active.filter(m=>m.quantity>0);
+  const lowStock = active.filter(m=>m.quantity>0&&m.quantity<10);
+  document.getElementById('statTotal').textContent = active.length;
+  document.getElementById('statInStock').textContent = inStock.length;
+  document.getElementById('statLow').textContent = lowStock.length;
+  document.getElementById('statRevenue').textContent = 'Rs. '+totalRev.toLocaleString();
+  document.getElementById('stockBadge').textContent = inStock.length+' medicines in stock';
+  renderDashTable(active);
+  renderDashInvoices();
+}
+
+function renderDashTable(list){
+  const tb = document.getElementById('dashTableBody');
+  const show = list.slice(-6).reverse();
+  if(!show.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text3)">No medicines added yet</td></tr>';return;}
+  tb.innerHTML = show.map(m=>{
+    const st = m.quantity===0?'<span class="badge badge-red"><span class="badge-dot"></span>Out of Stock</span>':m.quantity<10?'<span class="badge badge-amber"><span class="badge-dot"></span>Low Stock</span>':'<span class="badge badge-green"><span class="badge-dot"></span>In Stock</span>';
+    return`<tr><td style="font-weight:500">${m.name}</td><td>Rs. ${m.price}</td><td>${m.quantity}</td><td>${st}</td></tr>`;
+  }).join('');
+}
+
+function renderDashInvoices(){
+  const el = document.getElementById('dashInvoiceList');
+  if(!invoices.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><div class="et">No invoices yet</div><div class="es">Sales will appear here</div></div>';return;}
+  const recent = invoices.slice(-5).reverse();
+  el.innerHTML = recent.map(inv=>`
+    <div style="padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:13px;font-weight:500">${inv.customer}</div><div style="font-size:12px;color:var(--text3)">${inv.medicine} × ${inv.qty}</div></div>
+      <div style="font-size:13px;font-weight:600;color:var(--accent)">Rs. ${inv.total}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════ INVENTORY ═══════════════════
+function renderInventory(){
+  const q = document.getElementById('invSearch').value.toLowerCase();
+  const f = document.getElementById('invFilter').value;
+  let list = medicines.filter(m=>m.name!=='REMOVED');
+  if(q) list = list.filter(m=>m.name.toLowerCase().includes(q)||String(m.id).includes(q));
+  if(f==='instock') list=list.filter(m=>m.quantity>10);
+  if(f==='low')     list=list.filter(m=>m.quantity>0&&m.quantity<=10);
+  if(f==='out')     list=list.filter(m=>m.quantity===0);
+  const tb = document.getElementById('invTableBody');
+  document.getElementById('invEmpty').style.display = list.length?'none':'block';
+  tb.innerHTML = list.map(m=>{
+    const idx = medicines.indexOf(m);
+    const st = m.quantity===0?'<span class="badge badge-red"><span class="badge-dot"></span>Out of Stock</span>':m.quantity<10?'<span class="badge badge-amber"><span class="badge-dot"></span>Low Stock</span>':'<span class="badge badge-green"><span class="badge-dot"></span>In Stock</span>';
+    return`<tr>
+      <td><span style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:5px;font-weight:500">#${m.id}</span></td>
+      <td style="font-weight:500">${m.name}</td>
+      <td>Rs. ${m.price.toLocaleString()}</td>
+      <td><span style="font-weight:600">${m.quantity}</span></td>
+      <td>${st}</td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-secondary" style="height:28px;padding:0 10px;font-size:12px" onclick="openEdit(${idx})">Edit</button>
+          <button class="btn btn-danger" style="height:28px;padding:0 10px;font-size:12px" onclick="removeMedicine(${idx})">Remove</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════ ADD ═══════════════════
+function addMedicine(){
+  let ok=true;
+  const id = parseInt(document.getElementById('fId').value);
+  const name = document.getElementById('fName').value.trim();
+  const price = parseInt(document.getElementById('fPrice').value);
+  const qty = parseInt(document.getElementById('fQty').value);
+  if(!id||isNaN(id)){setErr('fIdErr','Enter a valid ID');ok=false;}else{setErr('fIdErr','');}
+  if(medicines.find(m=>m.id===id&&m.name!=='REMOVED')){setErr('fIdErr','ID already exists');ok=false;}
+  if(!name){setErr('fNameErr','Enter medicine name');ok=false;}else{setErr('fNameErr','');}
+  if(!price||price<0||isNaN(price)){setErr('fPriceErr','Enter valid price');ok=false;}else{setErr('fPriceErr','');}
+  if(isNaN(qty)||qty<0){setErr('fQtyErr','Enter valid quantity');ok=false;}else{setErr('fQtyErr','');}
+  if(!ok)return;
+  medicines.push({id,name,price,quantity:qty});
+  save();
+  showToast('Medicine "'+name+'" added successfully','success');
+  document.getElementById('addSuccessName').textContent = name+' (ID: '+id+')';
+  document.getElementById('addSuccessCard').style.display='block';
+  clearAddForm(true);
+}
+function clearAddForm(keep){
+  ['fId','fName','fPrice','fQty'].forEach(i=>document.getElementById(i).value='');
+  ['fIdErr','fNameErr','fPriceErr','fQtyErr'].forEach(i=>setErr(i,''));
+  if(!keep) document.getElementById('addSuccessCard').style.display='none';
+}
+function setErr(id,msg){document.getElementById(id).textContent=msg;}
+
+// ═══════════════════ EDIT ═══════════════════
+function openEdit(idx){
+  const m=medicines[idx];
+  document.getElementById('editIndex').value=idx;
+  document.getElementById('eId').value=m.id;
+  document.getElementById('eName').value=m.name;
+  document.getElementById('ePrice').value=m.price;
+  document.getElementById('eQty').value=m.quantity;
+  openModal('editModal');
+}
+function saveEdit(){
+  const idx=parseInt(document.getElementById('editIndex').value);
+  const name=document.getElementById('eName').value.trim();
+  const price=parseInt(document.getElementById('ePrice').value);
+  const qty=parseInt(document.getElementById('eQty').value);
+  if(!name||!price||isNaN(qty)){showToast('Fill all fields','error');return;}
+  medicines[idx].name=name;medicines[idx].price=price;medicines[idx].quantity=qty;
+  save();renderInventory();closeModal('editModal');
+  showToast('Medicine updated successfully','success');
+}
+
+// ═══════════════════ REMOVE ═══════════════════
+function removeMedicine(idx){
+  if(!confirm('Remove "'+medicines[idx].name+'" from inventory?'))return;
+  medicines[idx].name='REMOVED';medicines[idx].price=0;medicines[idx].quantity=0;
+  save();renderInventory();updateDashboard();
+  showToast('Medicine removed','success');
+}
+
+// ═══════════════════ CUSTOMER ═══════════════════
+function searchMedicine(){
+  const q=document.getElementById('cSearch').value.toLowerCase();
+  const el=document.getElementById('cResults');
+  if(!q){el.innerHTML='';return;}
+  const results=medicines.filter(m=>m.name!=='REMOVED'&&(m.name.toLowerCase().includes(q)||String(m.id).includes(q)));
+  if(!results.length){el.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="et">No medicine found</div><div class="es">Try a different name or ID</div></div>';return;}
+  el.innerHTML=results.map(m=>{
+    const idx=medicines.indexOf(m);
+    const stClass=m.quantity===0?'badge-red':m.quantity<10?'badge-amber':'badge-green';
+    const stText=m.quantity===0?'Out of Stock':m.quantity<10?'Low Stock':'In Stock';
+    return`<div class="search-result-card">
+      <div class="med-info">
+        <div class="name">${m.name} <span style="font-size:12px;color:var(--text3);font-weight:400">#${m.id}</span></div>
+        <div class="details">Qty: ${m.quantity} &nbsp;|&nbsp; <span class="badge ${stClass}" style="font-size:11px">${stText}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="med-price">Rs. ${m.price}<div class="per">per unit</div></div>
+        <button class="btn btn-primary" style="margin-top:8px;height:30px;font-size:12px" onclick="openBuy(${idx})" ${m.quantity===0?'disabled style="opacity:.4;cursor:not-allowed"':''}>
+          Buy
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let currentBuyIdx=-1;
+function openBuy(idx){
+  currentBuyIdx=idx;
+  const m=medicines[idx];
+  document.getElementById('buyModalTitle').textContent='Purchase: '+m.name;
+  document.getElementById('buyMedIndex').value=idx;
+  document.getElementById('buyStock').textContent=m.quantity+' units available';
+  document.getElementById('buyHint').textContent='Price: Rs. '+m.price+' per unit';
+  document.getElementById('buyQty').value='';
+  document.getElementById('buyErr').textContent='';
+  document.getElementById('buyPreview').style.display='none';
+  openModal('buyModal');
+  document.getElementById('buyQty').addEventListener('input',updateBuyPreview);
+}
+function updateBuyPreview(){
+  const qty=parseInt(document.getElementById('buyQty').value)||0;
+  const m=medicines[currentBuyIdx];
+  const prev=document.getElementById('buyPreview');
+  if(qty>0){
+    prev.style.display='block';
+    document.getElementById('buyPreviewTotal').textContent='Rs. '+(qty*m.price).toLocaleString();
+  } else prev.style.display='none';
+}
+function confirmBuy(){
+  const idx=parseInt(document.getElementById('buyMedIndex').value);
+  const qty=parseInt(document.getElementById('buyQty').value);
+  const cName=document.getElementById('cName').value.trim()||'Walk-in Customer';
+  const m=medicines[idx];
+  if(!qty||qty<1){document.getElementById('buyErr').textContent='Enter a valid quantity';return;}
+  if(qty>m.quantity){document.getElementById('buyErr').textContent='Only '+m.quantity+' units available';return;}
+  m.quantity-=qty;
+  const total=qty*m.price;
+  totalRev+=total;
+  const inv={customer:cName,medicine:m.name,qty,price:m.price,total,date:new Date().toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'}),time:new Date().toLocaleTimeString('en-PK',{hour:'2-digit',minute:'2-digit'})};
+  invoices.push(inv);
+  save();
+  closeModal('buyModal');
+  showInvoice(inv);
+  searchMedicine();
+  showToast('Sale completed — Rs. '+total.toLocaleString(),'success');
+}
+function showInvoice(inv){
+  document.getElementById('invoiceSection').style.display='block';
+  document.getElementById('invoiceBox').innerHTML=`
+    <div class="invoice-header">
+      <div><div class="invoice-logo">Medi<span>Core</span></div><div style="font-size:12px;color:var(--text3);margin-top:2px">Pharmacy Management</div></div>
+      <div class="invoice-meta"><div style="font-weight:600;font-size:13px">INVOICE</div><div>${inv.date}</div><div>${inv.time}</div></div>
+    </div>
+    <hr class="invoice-divider"/>
+    <div class="invoice-row"><span>Customer</span><span style="font-weight:600">${inv.customer}</span></div>
+    <hr class="invoice-divider"/>
+    <div class="invoice-row"><span style="font-weight:500">${inv.medicine}</span></div>
+    <div class="invoice-row"><span style="color:var(--text3)">Unit Price</span><span>Rs. ${inv.price}</span></div>
+    <div class="invoice-row"><span style="color:var(--text3)">Quantity</span><span>${inv.qty} units</span></div>
+    <div class="invoice-total-row"><span>Total Amount</span><span>Rs. ${inv.total.toLocaleString()}</span></div>
+    <div class="invoice-stamp"><div class="stamp">PAID</div></div>
+    <div style="text-align:center;font-size:11.5px;color:var(--text3);margin-top:14px">Thank you for your visit!</div>`;
+}
+
+// ═══════════════════ INVOICES TABLE ═══════════════════
+function renderInvoices(){
+  const tb=document.getElementById('invoicesTableBody');
+  document.getElementById('invoicesEmpty').style.display=invoices.length?'none':'block';
+  document.getElementById('invoiceCount').textContent=invoices.length+' invoices';
+  tb.innerHTML=[...invoices].reverse().map((inv,i)=>`<tr>
+    <td><span style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:5px">${invoices.length-i}</span></td>
+    <td style="font-weight:500">${inv.customer}</td>
+    <td>${inv.medicine}</td>
+    <td>${inv.qty}</td>
+    <td style="font-weight:600;color:var(--accent)">Rs. ${inv.total.toLocaleString()}</td>
+    <td style="color:var(--text3)">${inv.date}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════ MODAL ═══════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// ═══════════════════ TOAST ═══════════════════
+let toastTimer;
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'');
+  void t.offsetWidth;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// init
+updateDate();
+</script>
+</body>
+</html>
